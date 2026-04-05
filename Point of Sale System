@@ -1,0 +1,158 @@
+import sys
+
+#PRODUCT CATALOG & INVENTORY
+
+products = {
+    "Rice": {"price": 200, "stock": 20},
+    "Flour": {"price": 150, "stock": 15},
+    "Sugar": {"price": 120, "stock": 10},
+    "Milk": {"price": 180, "stock": 8},
+    "Bread": {"price": 100, "stock": 4},
+    "Eggs": {"price": 300, "stock": 25},
+    "Juice": {"price": 250, "stock": 3},
+    "Soap": {"price": 90, "stock": 18},
+    "Toothpaste": {"price": 130, "stock": 7},
+    "Water": {"price": 80, "stock": 30}
+}
+
+TAX_RATE = 0.10
+DISCOUNT_RATE = 0.05
+
+def check_alerts():
+    """Scans inventory and prints warnings for items with stock < 5."""
+    print("\n Inventory Alerts ")
+    for item, details in products.items():
+      low_stock_found = False
+    if details["stock"] < 5:
+            print(f"ALERT: {item} is low! (Only {details['stock']} left)")
+
+            low_stock_found = True
+    if not low_stock_found:
+        print("All inventory levels are healthy.")
+
+def generate_receipt(cart, subtotal, discount, tax, total, payment, change):
+    """Prints a formatted receipt at the end of the transaction."""
+    print("\n" + "="*30)
+    print("--Suetanya & Carlton's Mini Mart--  ")
+    print("="*30)
+    for item, data in cart.items():
+        line_total = data['price'] * data['qty']
+        print(f"{item:<12} x{data['qty']:>2} @ ${data['price']:>6.2f} = ${line_total:>7.2f}")
+
+    print("-" * 30)
+    print(f"{'Subtotal:':<21}${subtotal:>8.2f}")
+    if discount > 0:
+        print(f"{'Discount (5%):':<21}-${discount:>8.2f}")
+    print(f"{'Tax (10%):':<21}${tax:>8.2f}")
+    print("-" * 30)
+    print(f"{'TOTAL:':<21}${total:>8.2f}")
+    print(f"{'Amount Paid:':<21}${payment:>8.2f}")
+    print(f"{'Change:':<21}${change:>8.2f}")
+    print("="*30)
+    print("   Thank You for Shopping!   ")
+    print("="*30 + "\n")
+
+def main():
+    while True:
+        #check how much stock is remaining
+        check_alerts()
+
+        cart = {}
+
+        while True:
+            print("\n--- Suetanya & Carlton's Mini Mart ---")
+            print("1. Add Item to Cart")
+            print("2. Remove Item from Cart")
+            print("3. View Cart")
+            print("4. Checkout")
+            print("5. Exit System")
+
+            choice = input("\nSelect an option (1-5): ")
+
+            if choice == "1":
+                print("\nAvailable Inventory:")
+                for p_name, p_info in products.items():
+                    print(f"- {p_name}: ${p_info['price']} (In Stock: {p_info['stock']})")
+
+                item_input = input("\nEnter item name: ").title()
+                if item_input in products:
+                    try:
+                        qty = int(input(f"Enter quantity for {item_input}: "))
+                        if qty <= 0:
+                            print("Quantity must be greater than zero.")
+                        elif qty > products[item_input]["stock"]:
+                            print(f"Insufficient stock! Only {products[item_input]['stock']} available.")
+                        else:
+                            #Update Cart
+                            if item_input in cart:
+                                cart[item_input]["qty"] += qty
+                            else:
+                                cart[item_input] = {"price": products[item_input]["price"], "qty": qty}
+
+                            #Deduct from Inventory
+                            products[item_input]["stock"] -= qty
+                            print(f"Success: {qty} {item_input}(s) added.")
+                    except ValueError:
+                        print("Invalid input. Please enter a whole number for quantity.")
+                else:
+                    print("Error: Item not found in catalog.")
+
+            elif choice == "2":
+                if not cart:
+                    print("Your cart is already empty.")
+                else:
+                    item_to_remove = input("Enter item name to remove: ").title()
+                    if item_to_remove in cart:
+                        #Add stock back to inventory
+                        products[item_to_remove]["stock"] += cart[item_to_remove]["qty"]
+                        del cart[item_to_remove]
+                        print(f"Success: {item_to_remove} removed from cart.")
+                    else:
+                        print("Item not found in your cart.")
+
+            elif choice == "3":
+                print("\n--- CURRENT CART ---")
+                if not cart:
+                    print("Empty")
+                else:
+                    for item, data in cart.items():
+                        print(f"{item}: {data['qty']} @ ${data['price']} each")
+
+            elif choice == "4":
+                if not cart:
+                    print("Cannot checkout with an empty cart.")
+                    continue
+
+                #Calculations
+                subtotal = sum(item['price'] * item['qty'] for item in cart.values())
+                discount = subtotal * DISCOUNT_RATE if subtotal > 5000 else 0
+                tax = (subtotal - discount) * TAX_RATE
+                total = subtotal - discount + tax
+
+                print(f"\nOrder Total: ${total:.2f}")
+
+                try:
+                    payment = float(input("Enter cash amount: "))
+                    if payment < total:
+                        print(f"Insufficient payment. You need ${total - payment:.2f} more.")
+                    else:
+                        change = payment - total
+                        generate_receipt(cart, subtotal, discount, tax, total, payment, change)
+                        break # Break inner loop and start a new transaction
+                except ValueError:
+                    print("Invalid payment amount.")
+
+            elif choice == "5":
+                print("Shutting down POS system...")
+                return
+
+            else:
+                print("Invalid selection. Please choose 1-5.")
+
+        #start a new customer transaction?
+        new_customer = input("Process next customer? (yes/no): ").lower()
+        if new_customer != "yes":
+            print("System logged out.")
+            break
+
+main()
