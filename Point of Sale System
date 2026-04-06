@@ -1,6 +1,10 @@
 import sys
 
 #PRODUCT CATALOG & INVENTORY
+# Dictionary storing all available products.
+# Each product has:
+# price: cost per unit
+# stock: number of items available in inventory
 
 products = {
     "Rice": {"price": 200, "stock": 20},
@@ -15,8 +19,19 @@ products = {
     "Water": {"price": 80, "stock": 30}
 }
 
+
+# CONSTANTS
+# TAX_RATE: 10% government tax applied to purchases
+# DISCOUNT_RATE: 5% discount applied when subtotal exceeds 5000
+
 TAX_RATE = 0.10
 DISCOUNT_RATE = 0.05
+
+# FUNCTION: check_alerts
+# Purpose:
+# Checks all products in inventory and alerts the cashier if any item
+# is running low (stock less than 5 units).
+# This helps prevent selling items that are almost out of stock.
 
 def check_alerts():
     """Scans inventory and prints warnings for items with stock < 5."""
@@ -29,6 +44,19 @@ def check_alerts():
             low_stock_found = True
     if not low_stock_found:
         print("All inventory levels are healthy.")
+
+
+
+# FUNCTION: generate_receipt
+# Purpose:
+# Prints a detailed receipt after checkout.
+# Shows:
+# - items purchased
+# - subtotal
+# - discount
+# - tax
+# - total amount
+# - payment and change
 
 def generate_receipt(cart, subtotal, discount, tax, total, payment, change):
     """Prints a formatted receipt at the end of the transaction."""
@@ -52,6 +80,15 @@ def generate_receipt(cart, subtotal, discount, tax, total, payment, change):
     print("   Thank You for Shopping!   ")
     print("="*30 + "\n")
 
+
+# MAIN PROGRAM FUNCTION
+# Controls the overall POS system workflow.
+# Handles:
+# - menu display
+# - user input
+# - cart management
+# - checkout process
+
 def main():
     while True:
         #check how much stock is remaining
@@ -68,6 +105,8 @@ def main():
             print("5. Exit System")
 
             choice = input("\nSelect an option (1-5): ")
+
+# OPTION 1: ADD ITEM
 
             if choice == "1":
                 print("\nAvailable Inventory:")
@@ -97,6 +136,8 @@ def main():
                 else:
                     print("Error: Item not found in catalog.")
 
+# OPTION 2: REMOVE ITEM
+
             elif choice == "2":
                 if not cart:
                     print("Your cart is already empty.")
@@ -110,6 +151,8 @@ def main():
                     else:
                         print("Item not found in your cart.")
 
+# OPTION 3: VIEW CART
+
             elif choice == "3":
                 print("\n--- CURRENT CART ---")
                 if not cart:
@@ -117,6 +160,8 @@ def main():
                 else:
                     for item, data in cart.items():
                         print(f"{item}: {data['qty']} @ ${data['price']} each")
+
+# OPTION 4: CHECKOUT
 
             elif choice == "4":
                 if not cart:
@@ -142,6 +187,8 @@ def main():
                 except ValueError:
                     print("Invalid payment amount.")
 
+# OPTION 5: EXIT SYSTEM
+
             elif choice == "5":
                 print("Shutting down POS system...")
                 return
@@ -154,5 +201,9 @@ def main():
         if new_customer != "yes":
             print("System logged out.")
             break
+
+
+# PROGRAM START
+# The main function starts the POS system
 
 main()
